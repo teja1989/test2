@@ -1,40 +1,54 @@
 import simpleGit from 'simple-git';
 import path from 'path';
 import fs from 'fs/promises';
-import { config } from '../lib/config.js';
+import { config, type RepoConfig } from '../lib/config.js';
 import { logger } from '../lib/logger.js';
 
-export interface RepoConfig {
-  url: string;
-  name: string;
-}
+export type { RepoConfig };
 
 export function getRepoConfigs(): RepoConfig[] {
-  const repos: RepoConfig[] = [];
-  let i = 1;
-  while (process.env[`REPO_${i}_URL`]) {
-    repos.push({
-      url: process.env[`REPO_${i}_URL`]!,
-      name: process.env[`REPO_${i}_NAME`] ?? `repo-${i}`,
-    });
-    i++;
+  return config.GITHUB_REPOS;
+}
+
+/**
+ * Injects the PAT into an HTTPS URL as the password so git can authenticate
+ * without writing credentials to disk.  SSH git@ URLs are returned unchanged
+ * because PATs don't apply to SSH transport.
+ */
+function buildAuthUrl(url: string, pat: string): string {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'https:') {
+      parsed.username = 'oauth2';
+      parsed.password = pat;
+      return parsed.toString();
+    }
+  } catch {
+    // git@github.com:org/repo.git — not a standard URL; SSH key auth handles it
   }
-  return repos;
+  return url;
 }
 
 export async function syncRepo(repo: RepoConfig): Promise<void> {
   const repoPath = path.resolve(config.DOCS_BASE_PATH, repo.name);
   await fs.mkdir(repoPath, { recursive: true });
 
+  const branch = repo.branch;
+
+  // Build authenticated URL on every call — never persisted in .git/config
+  const remoteUrl = config.GITHUB_PAT ? buildAuthUrl(repo.url, config.GITHUB_PAT) : repo.url;
+
   const git = simpleGit(repoPath);
   const isRepo = await git.checkIsRepo().catch(() => false);
 
   if (!isRepo) {
-    logger.info(`Cloning ${repo.name} from ${repo.url}`);
-    await simpleGit().clone(repo.url, repoPath, ['--depth', '1']);
+    logger.info(`Cloning ${repo.name}@${branch}`);
+    await simpleGit().clone(remoteUrl, repoPath, ['--depth', '1', '--branch', branch]);
   } else {
-    logger.info(`Pulling latest for ${repo.name}`);
-    await git.pull('origin', 'main', ['--ff-only']);
+    logger.info(`Fetching ${repo.name}@${branch}`);
+    // Pass the authenticated URL directly so it is never stored in git config
+    await git.fetch(remoteUrl, branch);
+    await git.merge(['FETCH_HEAD', '--ff-only']);
   }
 
   logger.info(`Sync complete for ${repo.name}`);
@@ -43,7 +57,7 @@ export async function syncRepo(repo: RepoConfig): Promise<void> {
 export async function syncAllRepos(): Promise<void> {
   const repos = getRepoConfigs();
   if (repos.length === 0) {
-    logger.warn('No repos configured. Set REPO_1_URL / REPO_1_NAME in .env');
+    logger.warn('No repos configured — set GITHUB_REPOS in .env');
     return;
   }
   const results = await Promise.allSettled(repos.map(syncRepo));

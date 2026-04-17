@@ -57,8 +57,8 @@ See [`.env.example`](.env.example) for all variables.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `REPO_N_URL` | SSH/HTTPS URL for repo N | — |
-| `REPO_N_NAME` | Local folder name for repo N | — |
+| `GITHUB_REPOS` | JSON array of repo objects (see below) | `[]` |
+| `GITHUB_PAT` | Personal Access Token — `repo` read scope for private HTTPS repos | — |
 | `DOCS_BASE_PATH` | Root dir for cloned repos | `./repos` |
 | `ES_NODE` | Elasticsearch URL | `http://localhost:9200` |
 | `ES_INDEX` | Index name | `devdocs` |
@@ -68,14 +68,19 @@ See [`.env.example`](.env.example) for all variables.
 
 ## Repository Configuration
 
-Add as many `REPO_N_URL` / `REPO_N_NAME` pairs as needed:
+`GITHUB_REPOS` is a JSON array. Each entry supports `url`, `name`, and an optional `branch` (default `main`):
 
 ```env
-REPO_1_URL=git@github.com:org/service-platform.git
-REPO_1_NAME=service-platform
-REPO_3_URL=git@github.com:org/another-repo.git
-REPO_3_NAME=another-repo
+GITHUB_REPOS=[
+  {"url":"https://github.com/org/service-platform.git","name":"service-platform","branch":"main"},
+  {"url":"https://github.com/org/infra-platform.git","name":"infra-platform"},
+  {"url":"git@github.com:org/private-docs.git","name":"private-docs"}
+]
 ```
+
+> **PAT vs SSH**
+> - **HTTPS repos** — set `GITHUB_PAT` to a fine-grained token with _Contents: Read_ permission. The token is injected into the URL at runtime and is never written to `.git/config`.
+> - **SSH repos** — PAT is ignored; authentication uses your SSH key as normal.
 
 ## GitHub Webhook
 
