@@ -2,13 +2,28 @@ import { useParams } from 'react-router-dom';
 import { RefreshCw, AlertCircle } from 'lucide-react';
 import { useDoc } from '../hooks/useDocs';
 import DocViewer from '../components/DocViewer';
+import PdfViewer from '../components/PdfViewer';
 
 export default function DocPage() {
   const params = useParams<{ repo: string; '*': string }>();
   const repo = params.repo;
   const docPath = params['*'] ?? 'README.md';
 
-  const { data, isLoading, error } = useDoc(repo, docPath);
+  const isPdf = docPath.toLowerCase().endsWith('.pdf');
+
+  // For PDFs we load via URL directly — no need to fetch raw content
+  const { data, isLoading, error } = useDoc(
+    isPdf ? undefined : repo,
+    isPdf ? undefined : docPath,
+  );
+
+  if (isPdf) {
+    return (
+      <div className="mx-auto max-w-5xl">
+        <PdfViewer url={`/api/docs/${repo}/${docPath}`} />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

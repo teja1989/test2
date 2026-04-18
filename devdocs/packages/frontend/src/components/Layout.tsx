@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import ChatPanel from './ChatPanel';
 import { useAppStore } from '../lib/store';
 
 interface LayoutProps {
@@ -21,6 +22,8 @@ export default function Layout({ children }: LayoutProps) {
         <TopBar />
         <main className="flex-1 overflow-auto p-6 lg:p-8">{children}</main>
       </div>
+      {/* Chat assistant floating panel */}
+      <ChatPanel />
     </div>
   );
 }
