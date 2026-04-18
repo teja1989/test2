@@ -2,6 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { config } from '../lib/config.js';
 import { getRepoConfigs, syncRepo } from '../services/gitSync.js';
+import { notifyWebhookPush } from '../services/teamsNotifier.js';
 import { logger } from '../lib/logger.js';
 
 export const webhooksRouter = Router();
@@ -32,12 +33,24 @@ webhooksRouter.post('/github', async (req, res, next) => {
     const payload = JSON.parse((req.body as Buffer).toString('utf-8')) as {
       ref?: string;
       repository?: { name?: string };
+      pusher?: { name?: string };
+      head_commit?: { message?: string };
     };
 
     const repoName = payload.repository?.name;
-    if (payload.ref === 'refs/heads/main' && repoName) {
+    const branch = payload.ref?.replace('refs/heads/', '');
+
+    if (branch && repoName) {
       const repo = getRepoConfigs().find((r) => r.name === repoName);
-      if (repo) {
+      if (repo && branch === repo.branch) {
+        // Fire Teams notification immediately, sync runs async
+        void notifyWebhookPush(
+          repoName,
+          branch,
+          payload.pusher?.name,
+          payload.head_commit?.message,
+        );
+
         syncRepo(repo).catch((err: unknown) =>
           logger.error(`Webhook sync failed for ${repoName}:`, err),
         );

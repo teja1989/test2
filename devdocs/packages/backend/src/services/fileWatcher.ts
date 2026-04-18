@@ -6,6 +6,7 @@ import { indexDocument } from './elasticsearch.js';
 import { parseMarkdownFile } from './markdownParser.js';
 import { parsePdfFile } from './pdfParser.js';
 import { getRepoConfigs } from './gitSync.js';
+import { queueFileNotification } from './teamsNotifier.js';
 
 const SUPPORTED = new Set(['.md', '.mdx', '.pdf']);
 
@@ -20,6 +21,10 @@ async function processFile(filePath: string, repo: string, basePath: string): Pr
         : await parseMarkdownFile(filePath, repo, basePath);
 
     await indexDocument(doc);
+
+    // Queue into the 5-second batch window so we don't flood Teams
+    queueFileNotification(repo, path.relative(basePath, filePath));
+
     logger.debug(`Indexed: ${filePath}`);
   } catch (err) {
     logger.error(`Failed to process ${filePath}:`, err);

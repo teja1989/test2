@@ -21,6 +21,11 @@ const envSchema = z.object({
   // GitHub PAT — injected into HTTPS clone/fetch URLs; SSH repos are unaffected
   GITHUB_PAT: z.string().optional(),
 
+  // Microsoft Teams Incoming Webhook URL for change notifications
+  TEAMS_WEBHOOK_URL: z.string().url().optional(),
+  // Public URL of the DevDocs frontend — used to build "Open DevDocs" action buttons
+  APP_URL: z.string().url().optional(),
+
   // JSON array of repo objects: [{"url":"...","name":"...","branch":"main"}, ...]
   GITHUB_REPOS: z
     .string()
