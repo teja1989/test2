@@ -13,9 +13,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3001),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
-  // ── Elasticsearch ────────────────────────────────────────────────────────────
-  ES_NODE: z.string().url().default('http://localhost:9200'),
-  ES_INDEX: z.string().min(1).default('devdocs'),
+  // ── Azure AI Search ──────────────────────────────────────────────────────────
+  AZURE_SEARCH_ENDPOINT: z.string().url(),
+  AZURE_SEARCH_KEY: z.string().min(1),
+  AZURE_SEARCH_INDEX_NAME: z.string().min(1).default('devdocs'),
 
   // ── Git / repos ──────────────────────────────────────────────────────────────
   DOCS_BASE_PATH: z.string().min(1).default('./repos'),

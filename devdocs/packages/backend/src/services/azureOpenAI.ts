@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { config } from '../lib/config.js';
-import { searchDocuments, type SearchHit } from './elasticsearch.js';
+import { searchDocuments, type SearchHit } from './azureAISearch.js';
 
 function buildClient(): OpenAI | null {
   if (!config.AZURE_OPENAI_ENDPOINT || !config.AZURE_OPENAI_API_KEY) return null;

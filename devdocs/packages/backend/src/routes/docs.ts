@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import fs from 'fs/promises';
 import path from 'path';
-import { esClient } from '../services/elasticsearch.js';
+import { listDocuments } from '../services/azureAISearch.js';
 import { renderMarkdown } from '../services/markdownParser.js';
 import { config } from '../lib/config.js';
 
@@ -9,14 +9,8 @@ export const docsRouter = Router();
 
 docsRouter.get('/', async (_req, res, next) => {
   try {
-    const result = await esClient.search({
-      index: config.ES_INDEX,
-      query: { match_all: {} },
-      size: 500,
-      _source: ['id', 'repo', 'path', 'title', 'type', 'updatedAt', 'tags'],
-      sort: [{ 'title.keyword': 'asc' }],
-    });
-    res.json(result.hits.hits.map((h) => h._source));
+    const docs = await listDocuments();
+    res.json(docs);
   } catch (err) {
     next(err);
   }

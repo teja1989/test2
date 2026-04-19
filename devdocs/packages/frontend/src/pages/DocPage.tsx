@@ -19,7 +19,7 @@ export default function DocPage() {
 
   if (isPdf) {
     return (
-      <div className="mx-auto max-w-5xl">
+      <div className="w-full">
         <PdfViewer url={`/api/docs/${repo}/${docPath}`} />
       </div>
     );

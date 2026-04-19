@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import session from 'express-session';
 import { config } from './lib/config.js';
 import { logger } from './lib/logger.js';
-import { ensureIndex } from './services/elasticsearch.js';
+import { ensureIndex } from './services/azureAISearch.js';
 import { syncAllRepos } from './services/gitSync.js';
 import { startFileWatcher } from './services/fileWatcher.js';
 import { initAuthClient } from './services/auth.js';

@@ -2,7 +2,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { config } from '../lib/config.js';
 import { logger } from '../lib/logger.js';
-import { indexDocument } from './elasticsearch.js';
+import { indexDocument } from './azureAISearch.js';
 import { parseMarkdownFile } from './markdownParser.js';
 import { parsePdfFile } from './pdfParser.js';
 import { getRepoConfigs } from './gitSync.js';

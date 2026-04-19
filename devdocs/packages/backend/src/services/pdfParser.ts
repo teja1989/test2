@@ -2,7 +2,7 @@ import pdfParse from 'pdf-parse';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
-import type { DocDocument } from './elasticsearch.js';
+import type { DocDocument } from './azureAISearch.js';
 
 export async function parsePdfFile(
   filePath: string,

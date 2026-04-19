@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^8.12.2",
+    "@azure/search-documents": "^12.2.0",
     "chokidar": "^3.6.0",
     "cors": "^2.8.5",
     "express": "^5.0.1",

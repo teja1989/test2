@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { searchDocuments } from '../services/elasticsearch.js';
+import { searchDocuments } from '../services/azureAISearch.js';
 
 export const searchRouter = Router();
 
