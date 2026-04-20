@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./packages/backend
+      target: production
+    ports:
+      - '3001:3001'
+    environment:
+      - NODE_ENV=production
+      - DOCS_BASE_PATH=/repos
+      - PORT=3001
+    env_file:
+      - .env
+    volumes:
+      - repos_data:/repos
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:3001/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./packages/frontend
+      target: production
+    ports:
+      - '80:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  repos_data:
