@@ -7,6 +7,9 @@
     "build": "pnpm -r run build",
     "typecheck": "pnpm -r run typecheck",
     "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "test:watch": "pnpm -r run test:watch",
+    "test:coverage": "pnpm -r run test:coverage",
     "clean": "pnpm -r exec rm -rf dist node_modules"
   },
   "packageManager": "pnpm@8.15.0",

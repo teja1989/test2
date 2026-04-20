@@ -16,11 +16,14 @@ docsRouter.get('/', async (_req, res, next) => {
   }
 });
 
-docsRouter.get('/:repo/*', async (req, res, next) => {
+docsRouter.get('/:repo/*docPath', async (req, res, next) => {
   try {
     const { repo } = req.params;
-    // Express 5 wildcard is available as params['0'] (unnamed) or via the splat
-    const docPath = (req.params as Record<string, string>)['0'] ?? '';
+    // Express 5 + path-to-regexp v8: wildcard captures are returned as string[]
+    const rawDocPath = req.params['docPath'];
+    const docPath = Array.isArray(rawDocPath)
+      ? rawDocPath.join('/')
+      : (rawDocPath ?? '');
     const fullPath = path.resolve(config.DOCS_BASE_PATH, repo, docPath);
 
     // Guard path traversal
